@@ -1,0 +1,55 @@
+
+name: Node CI
+
+# Triggers: when the workflow runs ---
+on:
+  
+  push:
+    # "**" matches all branches
+    branches: ["**"]
+  # Run on every PR to any branch
+  pull_request:
+    branches: ["**"]
+  # Nightly scheduled run at 02:30 UTC (uses default branch)
+  schedule:
+    - cron: "30 2 * * *"
+  # Allow manual runs from the Actions UI
+  workflow_dispatch: {}
+
+# Give the workflow only what's needed
+permissions:
+  contents: read  # read-only repo access
+
+# Avoid duplicate runs on the same branch by cancelling in-progress ones
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# --- Jobs to execute ---
+jobs:
+  # Job identifier
+  test:
+    # Nice display name including matrix values
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    # Choose the runner OS from the matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # OS to test on
+        os: [ubuntu-latest]
+        # Node versions to test (LTS + current)
+        node: [20, 22]
+    steps:
+      # Check out your repository code
+      - uses: actions/checkout@v4
+      # Install the requested Node version and enable npm caching
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}  # pick version from matrix
+          cache: npm                        # speed up installs
+      # Install dependencies from package.json
+      - run: npm install
+      # Run tests (safe even if no tests exist yet)
+      - run: npm test --if-present
+        env:
+          CI: true  # tell tools we're in CI (non-interactive)
