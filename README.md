@@ -1,48 +1,54 @@
-A very simple demo of OAuth 2.0 using Node.js，to add GitHub login to your app and access GitHub API.
+# CI Pipeline with GitHub Actions
 
-![](https://www.wangbase.com/blogimg/asset/201904/bg2019042103.jpg)
+[![CI](https://github.com/Temiraph/CI-Pipeline-with-GitHub-Actions/actions/workflows/ci.yml/badge.svg)](https://github.com/Temiraph/CI-Pipeline-with-GitHub-Actions/actions)
 
-This demo is slightly modified from sohamkamani's [node-oauth-example](https://github.com/sohamkamani/node-oauth-example). More details in his [blog](https://www.sohamkamani.com/blog/javascript/2018-06-24-oauth-with-node-js/) (English) or my [blog](http://www.ruanyifeng.com/blog/2019/04/github-oauth.html) (Chinese).
+A simple, lightweight Continuous Integration (CI) pipeline for a Node.js project using GitHub Actions.  
+Automatically runs on push, pull requests, and nightly schedules to detect issues early.
 
-## Step one: register the app
+---
 
-Register the app on Github : https://github.com/settings/applications/new .
+## 🚀 What it does
 
-![](https://www.wangbase.com/blogimg/asset/201904/bg2019042102.jpg)
+- Runs tests on **Node.js 20 & 22** via a matrix strategy  
+- Triggers on `push`, `pull_request`, `schedule` (nightly), and manual dispatch  
+- Uses npm caching (based on `package-lock.json`) for faster installs  
+- Prevents duplicate workflow runs (via concurrency settings)  
+- Clean setup with minimal permissions  
 
-- "Application name" field, enter any name you like.
-- "Homepage URL" field, enter "http://localhost:8080/ ".
-- "callback URL" field, enter "http://localhost:8080/oauth/redirect ".
+---
 
-Once register, you will get a client ID and a client secret.
+## 🧰 Setup & Usage
 
-## Step two: get the code
+1. Clone or fork this repo  
+2. Install dependencies:  
+   ```bash
+   npm install
+Run tests locally
 
-First, clone the repo.
+npm test
 
-```bash
-$ git clone git@github.com:ruanyf/node-oauth-demo.git
-$ cd node-oauth-demo
-```
 
-Second, modify the config.
+Push a commit or open a PR — CI runs automatically.
 
-- `index.js`: replace the values of the `clientID` and `clientSecret` variables.
-- `public/index.html`: replace the values of the `client_id` variable.
+Project scripts
 
-Third, install the dependencies.
+npm test — runs a minimal smoke test (Node’s built-in test runner)
 
-```bash
-$ npm install
-```
+CI details (./.github/workflows/ci.yml)
 
-## Step three: run the server
+Uses actions/checkout@v4 and actions/setup-node@v4
 
-Now, run the server.
+Caches npm based on package-lock.json
 
-```bash
-$ node index.js
-```
+Matrix strategy for Node 20 & 22
 
-Visit http://localhost:8080 in your browser, and click the link to login GitHub.
+Scheduled cron (02:30 UTC by default)
+
+Troubleshooting
+
+Cache step failing ➜ Ensure package-lock.json is committed.
+
+PR shows 0 checks ➜ If PR is to an upstream repo, CI may require maintainer approval. PR within your fork will run immediately.
+
+Why multiple checks? ➜ Matrix (2 Node versions) × Events (push + PR) = multiple runs.
 
